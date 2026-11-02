@@ -1,0 +1,1334 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>JZ Match Setup Tool</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f5f1;
+    --surface: #ffffff;
+    --surface-2: #f1f4ef;
+    --text: #17201a;
+    --muted: #5b695f;
+    --border: #d8dfd5;
+    --accent: #1f7a45;
+    --accent-ink: #ffffff;
+    --home: #1f6fb5;
+    --away: #c2561b;
+    --danger: #b3261e;
+    --warn: #8a5a00;
+    --ok: #1f7a45;
+    --focus: #2b7bff;
+    --shadow: 0 1px 2px rgba(20, 30, 22, .06), 0 4px 14px rgba(20, 30, 22, .05);
+    --pitch-a: #31965a;
+    --pitch-b: #2b884f;
+    --pitch-line: rgba(255, 255, 255, .8);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111713;
+      --surface: #19211b;
+      --surface-2: #212b23;
+      --text: #e8efe9;
+      --muted: #9fb0a3;
+      --border: #2f3b31;
+      --accent: #43b873;
+      --accent-ink: #06210f;
+      --home: #62adf2;
+      --away: #f39257;
+      --danger: #ff8a80;
+      --warn: #f0b84d;
+      --ok: #5fd08a;
+      --focus: #6aa5ff;
+      --shadow: none;
+      --pitch-a: #226b3e;
+      --pitch-b: #1e5f37;
+      --pitch-line: rgba(255, 255, 255, .55);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111713;
+    --surface: #19211b;
+    --surface-2: #212b23;
+    --text: #e8efe9;
+    --muted: #9fb0a3;
+    --border: #2f3b31;
+    --accent: #43b873;
+    --accent-ink: #06210f;
+    --home: #62adf2;
+    --away: #f39257;
+    --danger: #ff8a80;
+    --warn: #f0b84d;
+    --ok: #5fd08a;
+    --focus: #6aa5ff;
+    --shadow: none;
+    --pitch-a: #226b3e;
+    --pitch-b: #1e5f37;
+    --pitch-line: rgba(255, 255, 255, .55);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  .app { max-width: 1120px; margin: 0 auto; padding: 20px 16px 64px; }
+
+  /* ---------- Header ---------- */
+  .app-header {
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+    gap: 12px 20px; margin-bottom: 18px;
+  }
+  .app-header h1 { font-size: 1.6rem; letter-spacing: -.01em; }
+  .app-header p { color: var(--muted); font-size: .95rem; margin-top: 2px; }
+  .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .save-status { font-size: .85rem; color: var(--muted); margin-right: 4px; }
+  .save-status.dirty { color: var(--warn); font-weight: 600; }
+  .save-status.clean { color: var(--ok); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 40px; padding: 8px 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; font-weight: 600; font-size: .95rem; line-height: 1.2;
+    transition: background .12s, border-color .12s;
+  }
+  .btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--muted); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover:not(:disabled) { background: var(--accent); filter: brightness(1.08); border-color: var(--accent); }
+  .btn-danger { color: var(--danger); }
+  .btn-danger:hover:not(:disabled) { border-color: var(--danger); }
+  .btn-danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .btn-danger-solid:hover:not(:disabled) { background: var(--danger); filter: brightness(1.1); border-color: var(--danger); }
+  .btn-sm { min-height: 36px; padding: 6px 12px; font-size: .9rem; }
+  .btn-home { color: var(--home); border-color: color-mix(in srgb, var(--home) 45%, var(--border)); }
+  .btn-away { color: var(--away); border-color: color-mix(in srgb, var(--away) 45%, var(--border)); }
+  .icon-btn {
+    display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0;
+    border: 1px solid transparent; border-radius: 8px; background: transparent;
+    color: var(--muted); cursor: pointer; font-size: 1rem; line-height: 1; flex: none;
+  }
+  .icon-btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+  .icon-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .icon-btn.remove:hover:not(:disabled) { color: var(--danger); border-color: var(--danger); }
+
+  /* ---------- Stepper ---------- */
+  .steps { display: flex; gap: 8px; margin-bottom: 16px; }
+  .step-tab {
+    flex: 1 1 0; display: flex; align-items: center; gap: 10px; text-align: left;
+    padding: 10px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; cursor: pointer; color: var(--muted); font-weight: 600;
+  }
+  .step-tab:disabled { opacity: .55; cursor: not-allowed; }
+  .step-tab .num {
+    display: grid; place-items: center; width: 26px; height: 26px; flex: none;
+    border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border);
+    font-size: .85rem;
+  }
+  .step-tab[aria-current="step"] { color: var(--text); border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+  .step-tab[aria-current="step"] .num { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; box-shadow: var(--shadow);
+  }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .panel h2 { font-size: 1.15rem; }
+  .panel-sub { color: var(--muted); font-size: .92rem; margin-top: 2px; }
+  .step-heading:focus { outline: none; }
+
+  /* ---------- Step 1 ---------- */
+  .counter { font-variant-numeric: tabular-nums; font-size: 1.5rem; font-weight: 700; }
+  .counter.full { color: var(--warn); }
+  .progress { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin: 10px 0 16px; border: 1px solid var(--border); }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  .counter.full + * .x, .progress.full > div { background: var(--warn); }
+
+  .add-form { display: flex; gap: 8px; }
+  .add-form input {
+    flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 8px 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;
+  }
+  .add-form input:disabled { background: var(--surface-2); opacity: .7; }
+  .add-form .btn { min-height: 44px; }
+  .form-msg { min-height: 1.4em; margin-top: 6px; font-size: .9rem; color: var(--danger); }
+  .form-msg.note { color: var(--warn); }
+
+  .pool-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .pool-item {
+    display: flex; align-items: center; gap: 10px; padding: 4px 6px 4px 12px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  }
+  .pool-item .idx { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 1.6em; font-size: .9rem; }
+  .pool-item .pname { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+  .empty { grid-column: 1 / -1; color: var(--muted); padding: 18px 4px; text-align: center; border: 1px dashed var(--border); border-radius: 8px; list-style: none; }
+  .actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+  .actions .hint { color: var(--muted); font-size: .9rem; }
+
+  /* ---------- Step 2 ---------- */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .toolbar-note { color: var(--muted); font-size: .85rem; }
+
+  .pool-panel { margin-bottom: 16px; }
+  .pool-panel .cards { margin-top: 12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .all-done { margin-top: 10px; color: var(--ok); font-weight: 600; }
+
+  .teams { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+  @media (min-width: 820px) { .teams { grid-template-columns: 1fr 1fr; } }
+  .team { background: var(--surface); border: 1px solid var(--border); border-top: 5px solid var(--tc); border-radius: 12px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+  .team-home { --tc: var(--home); --kit: #1f6fb5; }
+  .team-away { --tc: var(--away); --kit: #cf5a1c; }
+  .team-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .team-head h2 { font-size: 1.3rem; color: var(--tc); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { font-size: .8rem; padding: 2px 9px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+  .chip.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
+  .chip.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--border)); }
+
+  .sub-section { margin-top: 18px; }
+  .sub-section > h3 {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 1rem; padding-bottom: 6px; border-bottom: 2px solid var(--border);
+  }
+  .count { font-variant-numeric: tabular-nums; font-weight: 600; font-size: .9rem; color: var(--muted); }
+
+  /* ---------- Pitch ---------- */
+  .pitch {
+    position: relative; margin-top: 12px; border-radius: 12px; overflow: hidden; isolation: isolate;
+    min-height: 470px; display: grid; grid-template-rows: repeat(4, minmax(104px, auto));
+    background: repeating-linear-gradient(to bottom, var(--pitch-a) 0 60px, var(--pitch-b) 60px 120px);
+    border: 2px solid var(--pitch-line);
+  }
+  .pm { position: absolute; pointer-events: none; border: 2px solid var(--pitch-line); z-index: 0; }
+  .pm-center { top: 0; left: 50%; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; }
+  .pm-box { bottom: 0; left: 50%; width: 64%; height: 20%; transform: translateX(-50%); border-bottom: 0; }
+  .pm-six { bottom: 0; left: 50%; width: 30%; height: 8%; transform: translateX(-50%); border-bottom: 0; }
+  .pm-arc { bottom: 20%; left: 50%; width: 24%; aspect-ratio: 2 / 1; transform: translateX(-50%); border-bottom: 0; border-radius: 999px 999px 0 0; }
+  .pm-goal { bottom: 0; left: 50%; width: 14%; height: 2.4%; transform: translateX(-50%); border-bottom: 0; background: rgba(255,255,255,.22); }
+  .band {
+    position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: space-evenly;
+    align-items: center; align-content: center; gap: 6px 2px; padding: 24px 6px 8px;
+    transition: background .1s;
+  }
+  .band + .band { border-top: 1px dashed rgba(255, 255, 255, .2); }
+  .band.over { background: rgba(255, 255, 255, .2); }
+  .band-label {
+    position: absolute; top: 6px; left: 9px; font-size: .68rem; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: rgba(255, 255, 255, .85); pointer-events: none;
+  }
+  .token {
+    width: 76px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px;
+    cursor: grab; user-select: none; -webkit-user-select: none; border-radius: 10px;
+  }
+  .token .shirt {
+    width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--kit); color: #fff; font-weight: 800; font-size: .95rem; letter-spacing: .02em;
+    border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .35); transition: transform .1s;
+  }
+  .token:hover .shirt { transform: scale(1.07); }
+  .token.gk .shirt { background: #f2c230; color: #33270a; }
+  .token.selected .shirt { box-shadow: 0 0 0 4px #ffe066, 0 2px 8px rgba(0, 0, 0, .4); transform: scale(1.08); }
+  .token .tname {
+    max-width: 76px; font-size: .75rem; font-weight: 700; line-height: 1.15; color: #fff; text-align: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .75); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .token.dragging { opacity: .35; }
+  .token:focus-visible { outline: 3px solid #fff; outline-offset: 1px; background: rgba(0, 0, 0, .25); }
+  .pitch-hint {
+    position: absolute; z-index: 2; left: 14px; right: 14px; top: 42%; text-align: center;
+    color: rgba(255, 255, 255, .88); font-size: .88rem; pointer-events: none;
+  }
+  .sel-panel { margin-top: 10px; border-color: var(--tc); }
+  .pitch-tip { margin-top: 8px; color: var(--muted); font-size: .82rem; }
+  .bench-zone.over { outline: 3px dashed var(--tc); outline-offset: 4px; border-radius: 8px; }
+  .pcard[data-pool].dragging { opacity: .4; }
+
+  .group { margin-top: 12px; }
+  .group h4 {
+    display: flex; align-items: center; gap: 8px; font-size: .78rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted); margin-bottom: 6px;
+  }
+  .pill { background: var(--surface-2); border: 1px solid var(--border); border-radius: 99px; padding: 0 8px; font-size: .78rem; color: var(--text); font-variant-numeric: tabular-nums; }
+  .none { color: var(--muted); font-size: .88rem; padding: 2px 2px 0; opacity: .8; }
+
+  .cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .pcard { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: grid; gap: 6px; }
+  .pc-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .pc-top .pname { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .pc-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pc-controls select {
+    flex: 1 1 96px; min-width: 0; min-height: 36px; padding: 4px 8px; font-size: .9rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+  }
+  .pc-controls .team-btns { display: flex; gap: 6px; flex: 1 1 140px; }
+  .pc-controls .team-btns .btn { flex: 1; }
+
+  .bench-item { position: relative; }
+  .bench-item .pc-top { cursor: grab; }
+  .bench-item .pc-top button { cursor: pointer; }
+  .bench-item .handle { color: var(--muted); letter-spacing: -2px; user-select: none; padding: 0 2px; font-size: 1.1rem; line-height: 1; }
+  .bench-item .order { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--tc); min-width: 1.5em; }
+  .bench-item.dragging { opacity: .4; }
+  .bench-item.drop-before::before, .bench-item.drop-after::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 3px; border-radius: 3px; background: var(--tc);
+  }
+  .bench-item.drop-before::before { top: -5px; }
+  .bench-item.drop-after::after { bottom: -5px; }
+  .pos-summary { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
+  .reorder-hint { color: var(--muted); font-size: .82rem; margin-bottom: 8px; }
+
+  /* ---------- Export dialog ---------- */
+  .export-dialog { width: min(780px, calc(100vw - 20px)); max-height: 94vh; padding: 18px; }
+  .export-dialog[open] { display: flex; flex-direction: column; gap: 12px; }
+  .export-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .export-head h2 { margin: 0; }
+  .export-msg { color: var(--muted); font-size: .92rem; }
+  .export-msg.blocked { color: var(--warn); font-weight: 600; }
+  .export-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .export-preview { overflow: auto; flex: 1 1 auto; min-height: 0; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+  .text-pane { display: flex; flex-direction: column; gap: 8px; min-height: 0; flex: 1 1 auto; }
+  .text-pane[hidden] { display: none; }
+  .text-pane textarea {
+    width: 100%; min-height: 260px; flex: 1 1 auto; resize: vertical; padding: 12px;
+    font: .9rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+  }
+  .text-pane .text-note { color: var(--muted); font-size: .85rem; }
+  .export-preview img { display: block; width: 100%; height: auto; }
+
+  /* ---------- Dialog / toast ---------- */
+  dialog {
+    border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--text);
+    padding: 22px; width: min(420px, calc(100vw - 32px)); box-shadow: 0 18px 50px rgba(0,0,0,.3);
+  }
+  dialog::backdrop { background: rgba(10, 15, 11, .55); }
+  dialog h2 { font-size: 1.2rem; margin-bottom: 8px; }
+  dialog p { color: var(--muted); }
+  dialog .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px);
+    max-width: min(520px, calc(100vw - 32px)); padding: 10px 16px; border-radius: 10px;
+    background: var(--text); color: var(--bg); font-weight: 600; font-size: .92rem;
+    box-shadow: 0 6px 24px rgba(0,0,0,.25); opacity: 0; pointer-events: none;
+    transition: opacity .18s, transform .18s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 520px) {
+    .app { padding: 14px 12px 56px; }
+    .panel, .team { padding: 14px; }
+    .step-tab { padding: 8px 10px; }
+    .step-tab .label-long { display: none; }
+    .add-form .btn { padding-inline: 12px; }
+    .pc-controls select { flex-basis: 130px; }
+    .token { width: 66px; }
+    .token .tname { max-width: 66px; }
+    .token .shirt { width: 42px; height: 42px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* ---------- Print sheet (hidden on screen) ---------- */
+  #printSheet { display: none; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 13mm 14mm; }
+    html, body { background: #fff !important; color: #000 !important; }
+    body { font-size: 10.5pt; line-height: 1.35; }
+    .app, .toast, dialog { display: none !important; }
+    #printSheet { display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: system-ui, "Segoe UI", Arial, sans-serif; }
+
+    .ps-header { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 2pt solid #111; padding-bottom: 5pt; margin-bottom: 12pt; }
+    .ps-header h1 { font-size: 20pt; letter-spacing: -.01em; }
+    .ps-header p { font-size: 10pt; color: #444; }
+
+    .ps-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 16pt; align-items: start; }
+    .ps-team { border-top: 4pt solid #111; padding-top: 6pt; min-width: 0; }
+    .ps-home { border-top-color: #1f6fb5; }
+    .ps-away { border-top-color: #c2561b; }
+    .ps-team h2 { font-size: 16pt; margin-bottom: 4pt; }
+    .ps-home h2 { color: #1f6fb5; }
+    .ps-away h2 { color: #c2561b; }
+    .ps-team h3 { display: flex; justify-content: space-between; font-size: 11pt; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1pt solid #111; padding-bottom: 2pt; margin: 10pt 0 5pt; }
+    .ps-team h3 span, .ps-team h4 span { font-weight: 400; color: #444; }
+    .ps-group { break-inside: avoid; margin-bottom: 5pt; }
+    .ps-group h4 { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; color: #333; margin-bottom: 1pt; }
+    .ps-team ul, .ps-team ol { list-style: none; margin: 0; padding: 0; }
+    .ps-team li { padding: 2pt 0; border-bottom: .5pt dotted #888; }
+    .ps-team ol { counter-reset: bench; }
+    .ps-team ol li { display: flex; gap: 6pt; counter-increment: bench; }
+    .ps-team ol li::before { content: counter(bench) "."; min-width: 16pt; font-weight: 700; text-align: right; }
+    .ps-team ol .ps-name { flex: 1; }
+    .ps-team ol .ps-pos { color: #444; font-size: 9pt; }
+    .ps-none { color: #666; font-size: 9.5pt; }
+    .ps-unassigned { margin-top: 14pt; break-inside: avoid; }
+    .ps-unassigned h3 { font-size: 10.5pt; text-transform: uppercase; border-bottom: 1pt solid #888; margin-bottom: 4pt; }
+    .ps-unassigned p { font-size: 10pt; color: #333; }
+  }
+</style>
+<div class="app" id="app">
+
+  <header class="app-header">
+    <div>
+      <h1>Match setup</h1>
+      <p>Build your player pool, then sort everyone into two teams.</p>
+    </div>
+    <div class="header-actions">
+      <span id="saveStatus" class="save-status" aria-live="polite"></span>
+      <button type="button" id="saveBtn" class="btn">Save</button>
+      <button type="button" id="resetBtn" class="btn btn-danger">Reset</button>
+    </div>
+  </header>
+
+  <nav class="steps" aria-label="Steps">
+    <button type="button" class="step-tab" id="tab1"><span class="num">1</span><span>Player pool</span></button>
+    <button type="button" class="step-tab" id="tab2"><span class="num">2</span><span>Sort <span class="label-long">into </span>teams</span></button>
+  </nav>
+
+  <!-- ===== Step 1: player pool ===== -->
+  <section id="step1" class="panel" aria-labelledby="h1">
+    <div class="panel-head">
+      <div>
+        <h2 id="h1" class="step-heading" tabindex="-1">Player pool</h2>
+        <p class="panel-sub">Add players one at a time. Up to 22 (two teams of 11).</p>
+      </div>
+      <div class="counter" id="counter" aria-live="polite"><span id="countText">0 / 22</span></div>
+    </div>
+    <div class="progress" id="progress" role="presentation"><div id="progressBar"></div></div>
+
+    <form id="addForm" class="add-form" autocomplete="off" novalidate>
+      <label for="nameInput" class="sr-only">Player name</label>
+      <input id="nameInput" type="text" maxlength="30" placeholder="Player name" enterkeyhint="done">
+      <button type="button" id="addBtn" class="btn btn-primary">Add player</button>
+    </form>
+    <p id="formMsg" class="form-msg" role="alert"></p>
+
+    <ol id="poolList" class="pool-list" aria-label="Players in the pool"></ol>
+
+    <div class="actions">
+      <span class="hint" id="continueHint"></span>
+      <button type="button" id="toStep2" class="btn btn-primary">Continue to team sorting →</button>
+    </div>
+  </section>
+
+  <!-- ===== Step 2: team sorting ===== -->
+  <section id="step2" hidden aria-labelledby="h2">
+    <div class="toolbar">
+      <div>
+        <h2 id="h2" class="step-heading" tabindex="-1" style="font-size:1.15rem">Sort into teams</h2>
+      </div>
+      <div class="toolbar-right">
+        <button type="button" id="backBtn" class="btn">← Edit players</button>
+        <button type="button" id="exportBtn" class="btn btn-primary" title="Opens the print dialog. Choose “Save as PDF” as the destination.">Export as PDF</button>
+      </div>
+    </div>
+    <div id="sortStatus" class="sr-only" aria-live="polite"></div>
+    <section id="unassigned" class="panel pool-panel" aria-label="Unassigned players"></section>
+    <div id="teams" class="teams"></div>
+  </section>
+
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<dialog id="resetDialog" aria-labelledby="resetTitle">
+  <div>
+    <h2 id="resetTitle">Reset everything?</h2>
+    <p id="resetText">This clears the player pool and all team sorting, and deletes the plan saved in this browser. This can’t be undone.</p>
+    <div class="dialog-actions">
+      <button type="button" data-result="cancel" class="btn" autofocus>Cancel</button>
+      <button type="button" data-result="confirm" class="btn btn-danger-solid">Yes, reset everything</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="exportDialog" class="export-dialog" aria-labelledby="exportTitle">
+  <div class="export-head">
+    <h2 id="exportTitle">Export match sheet</h2>
+    <button type="button" class="icon-btn" id="exportClose" aria-label="Close" title="Close">✕</button>
+  </div>
+  <p id="exportMsg" class="export-msg"></p>
+  <div class="export-actions">
+    <button type="button" class="btn btn-primary" id="dlPdf">Download PDF</button>
+    <button type="button" class="btn" id="printAgain">Print…</button>
+    <button type="button" class="btn" id="copyText">Copy as text</button>
+  </div>
+  <div class="text-pane" id="textPane" hidden>
+    <p class="text-note">Copied automatically if your browser allows it. Otherwise the text is selected: press Ctrl+C (⌘C on Mac), or long-press and choose Copy.</p>
+    <textarea id="sheetTextArea" readonly aria-label="Match sheet as text"></textarea>
+    <div><button type="button" class="btn btn-sm" id="backToPreview">← Back to preview</button></div>
+  </div>
+  <div class="export-preview" id="exportPreview"><img id="exportImg" alt="Preview of the match sheet"></div>
+</dialog>
+
+<!-- Filled in by script right before printing -->
+<div id="printSheet" aria-hidden="true"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- Constants ---------- */
+  const MAX_PLAYERS = 22;
+  const MAX_XI = 11;
+  const NAME_MAX = 30;
+  const STORAGE_KEY = 'football-match-setup:v1';
+  const POS = [
+    { key: 'GK',  label: 'Goalkeeper',  plural: 'Goalkeepers' },
+    { key: 'DEF', label: 'Defender',    plural: 'Defenders' },
+    { key: 'MID', label: 'Midfielder',  plural: 'Midfielders' },
+    { key: 'STR', label: 'Striker',     plural: 'Strikers' },
+  ];
+  const POS_KEYS = POS.map(p => p.key);
+  const posLabel = k => (POS.find(p => p.key === k) || POS[2]).label;
+  const TEAM_NAME = { home: 'Home', away: 'Away' };
+
+  /* ---------- State ---------- */
+  // player: { id, name, team: null|'home'|'away', role: 'xi'|'sub', pos: 'GK'|'DEF'|'MID'|'STR', seq }
+  // seq orders the bench: a lower number means earlier on the bench.
+  let state = { players: [], seq: 0, step: 1 };
+  let savedKey = null;   // snapshot of the plan at last save/load (null = nothing saved)
+  let savedAt = null;
+
+  /* ---------- DOM ---------- */
+  const $ = id => document.getElementById(id);
+  const el = {
+    step1: $('step1'), step2: $('step2'), tab1: $('tab1'), tab2: $('tab2'),
+    counter: $('counter'), countText: $('countText'), progress: $('progress'), progressBar: $('progressBar'),
+    addForm: $('addForm'), nameInput: $('nameInput'), addBtn: $('addBtn'), formMsg: $('formMsg'),
+    poolList: $('poolList'), toStep2: $('toStep2'), continueHint: $('continueHint'),
+    backBtn: $('backBtn'), exportBtn: $('exportBtn'), unassigned: $('unassigned'), teams: $('teams'),
+    sortStatus: $('sortStatus'), saveBtn: $('saveBtn'), resetBtn: $('resetBtn'), saveStatus: $('saveStatus'),
+    toast: $('toast'), resetDialog: $('resetDialog'), printSheet: $('printSheet'),
+    h1: $('h1'), h2: $('h2'),
+  };
+
+  /* ---------- Helpers ---------- */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+  const byId = id => state.players.find(p => p.id === id);
+  const xiOf = (team, pos) => state.players.filter(p => p.team === team && p.role === 'xi' && (!pos || p.pos === pos));
+  const benchOf = team => state.players.filter(p => p.team === team && p.role === 'sub').sort((a, b) => a.seq - b.seq);
+  const unassignedPlayers = () => state.players.filter(p => !p.team);
+  const planKey = () => JSON.stringify({ players: state.players, seq: state.seq });
+
+  let toastTimer;
+  function toast(msg) {
+    el.toast.textContent = msg;
+    el.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.toast.classList.remove('show'), 3200);
+  }
+  function announce(msg) { el.sortStatus.textContent = ''; setTimeout(() => { el.sortStatus.textContent = msg; }, 30); }
+
+  /* ---------- Persistence ---------- */
+  function savePlan() {
+    try {
+      const savedTime = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: 1, players: state.players, seq: state.seq, step: state.step, savedAt: savedTime,
+      }));
+      savedKey = planKey();
+      savedAt = savedTime;
+      toast('Plan saved to this browser');
+    } catch (e) {
+      toast('Couldn’t save: browser storage is unavailable');
+    }
+    updateChrome();
+  }
+
+  function loadPlan() {
+    let data;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      data = JSON.parse(raw);
+    } catch (e) { return false; }
+    if (!data || !Array.isArray(data.players)) return false;
+
+    const seenIds = new Set();
+    const players = [];
+    for (const p of data.players.slice(0, MAX_PLAYERS)) {
+      if (!p || typeof p.name !== 'string') continue;
+      const name = p.name.trim().slice(0, NAME_MAX);
+      if (!name) continue;
+      let id = typeof p.id === 'string' && p.id && !seenIds.has(p.id) ? p.id : uid();
+      seenIds.add(id);
+      players.push({
+        id, name,
+        team: p.team === 'home' || p.team === 'away' ? p.team : null,
+        role: p.role === 'sub' ? 'sub' : 'xi',
+        pos: POS_KEYS.includes(p.pos) ? p.pos : 'MID',
+        seq: Number.isFinite(p.seq) ? p.seq : 0,
+      });
+    }
+    // Keep XI at 11 max per team, and give every player a unique bench number.
+    for (const t of ['home', 'away']) {
+      players.filter(p => p.team === t && p.role === 'xi').slice(MAX_XI).forEach(p => { p.role = 'sub'; p.seq = Infinity; });
+    }
+    [...players].sort((a, b) => a.seq - b.seq).forEach((p, i) => { p.seq = i + 1; });
+
+    state = { players, seq: players.length, step: data.step === 2 && players.length >= 2 ? 2 : 1 };
+    savedKey = planKey();
+    savedAt = Number.isFinite(data.savedAt) ? data.savedAt : null;
+    return true;
+  }
+
+  function clearSaved() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+    savedKey = null;
+    savedAt = null;
+  }
+
+  /* ---------- Header chrome (save status, tabs) ---------- */
+  function isDirty() { return savedKey === null ? state.players.length > 0 : planKey() !== savedKey; }
+  function updateChrome() {
+    const n = state.players.length;
+    const s = el.saveStatus;
+    s.className = 'save-status';
+    if (isDirty()) { s.textContent = 'Unsaved changes'; s.classList.add('dirty'); }
+    else if (savedKey !== null) {
+      const when = savedAt ? ' · ' + new Date(savedAt).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      s.textContent = 'Saved' + when; s.classList.add('clean');
+    } else { s.textContent = ''; }
+
+    el.tab1.setAttribute('aria-current', state.step === 1 ? 'step' : 'false');
+    el.tab2.setAttribute('aria-current', state.step === 2 ? 'step' : 'false');
+    el.tab2.disabled = n < 2;
+    el.tab2.title = n < 2 ? 'Add at least 2 players first' : '';
+  }
+
+  /* ---------- Step handling ---------- */
+  function setStep(n, focusHeading = true) {
+    if (n === 2 && state.players.length < 2) return;
+    state.step = n;
+    el.step1.hidden = n !== 1;
+    el.step2.hidden = n !== 2;
+    renderAll();
+    if (focusHeading) { window.scrollTo({ top: 0 }); (n === 1 ? el.h1 : el.h2).focus({ preventScroll: true }); }
+  }
+
+  function renderAll() {
+    if (state.step === 1) renderPool(); else renderSort();
+    updateChrome();
+  }
+
+  /* ---------- Step 1: pool ---------- */
+  function renderPool() {
+    const n = state.players.length;
+    const full = n >= MAX_PLAYERS;
+    el.countText.textContent = `${n} / ${MAX_PLAYERS}`;
+    el.counter.classList.toggle('full', full);
+    el.progress.classList.toggle('full', full);
+    el.progressBar.style.width = (n / MAX_PLAYERS * 100) + '%';
+    el.nameInput.disabled = full;
+    el.addBtn.disabled = full;
+    el.nameInput.placeholder = full ? 'Player pool is full' : 'Player name';
+    if (full && !el.formMsg.dataset.error) {
+      el.formMsg.className = 'form-msg note';
+      el.formMsg.textContent = 'The pool is full (22 players). Remove someone to add another.';
+    } else if (!full && !el.formMsg.dataset.error) {
+      el.formMsg.className = 'form-msg';
+      el.formMsg.textContent = '';
+    }
+
+    el.poolList.innerHTML = n
+      ? state.players.map((p, i) => `
+        <li class="pool-item">
+          <span class="idx">${i + 1}.</span>
+          <span class="pname">${esc(p.name)}</span>
+          <button type="button" class="icon-btn remove" data-remove="${p.id}" aria-label="Remove ${esc(p.name)}" title="Remove">✕</button>
+        </li>`).join('')
+      : '<li class="empty">No players yet. Add the first one above.</li>';
+
+    el.toStep2.disabled = n < 2;
+    el.continueHint.textContent = n < 2 ? 'Add at least 2 players to continue.' : '';
+  }
+
+  function setFormError(msg) {
+    if (msg) { el.formMsg.dataset.error = '1'; el.formMsg.className = 'form-msg'; el.formMsg.textContent = msg; }
+    else { delete el.formMsg.dataset.error; }
+  }
+
+  // Not wired to the form's submit event: sandboxed previews block form submission entirely.
+  function addPlayer() {
+    if (state.players.length >= MAX_PLAYERS) return;
+    const name = el.nameInput.value.replace(/\s+/g, ' ').trim();
+    if (!name) { setFormError('Enter a name first.'); renderPool(); el.nameInput.focus(); return; }
+    if (state.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+      setFormError(`“${name}” is already in the pool. Use a different name (e.g. add an initial).`);
+      renderPool(); el.nameInput.focus(); return;
+    }
+    setFormError('');
+    state.players.push({ id: uid(), name, team: null, role: 'xi', pos: 'MID', seq: 0 });
+    el.nameInput.value = '';
+    renderAll();
+    if (!el.nameInput.disabled) el.nameInput.focus(); else el.poolList.querySelector('[data-remove]')?.focus();
+  }
+  el.addBtn.addEventListener('click', addPlayer);
+  el.addForm.addEventListener('submit', e => e.preventDefault());
+  el.nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addPlayer(); }
+  });
+  el.nameInput.addEventListener('input', () => { if (el.formMsg.dataset.error) { setFormError(''); renderPool(); } });
+
+  el.poolList.addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove]');
+    if (!btn) return;
+    const p = byId(btn.dataset.remove);
+    if (!p) return;
+    state.players = state.players.filter(x => x.id !== p.id);
+    setFormError('');
+    renderAll();
+    toast(`Removed ${p.name}`);
+    if (!el.nameInput.disabled) el.nameInput.focus(); else el.poolList.querySelector('[data-remove]')?.focus();
+  });
+
+  el.toStep2.addEventListener('click', () => setStep(2));
+  el.tab1.addEventListener('click', () => setStep(1));
+  el.tab2.addEventListener('click', () => setStep(2));
+  el.backBtn.addEventListener('click', () => setStep(1));
+
+  /* ---------- Step 2: rendering ---------- */
+  function select(ctl, p, options, value) {
+    const labels = { team: 'Team', role: 'Role', pos: 'Position' };
+    return `<select data-ctl="${ctl}" aria-label="${labels[ctl]} for ${esc(p.name)}">` +
+      options.map(([v, label, disabled]) => `<option value="${v}"${v === value ? ' selected' : ''}${disabled ? ' disabled' : ''}>${label}</option>`).join('') +
+      '</select>';
+  }
+  function xiFullFor(p) {
+    if (!p.team) return false;
+    return state.players.filter(q => q.id !== p.id && q.team === p.team && q.role === 'xi').length >= MAX_XI;
+  }
+  function roleSelect(p) {
+    return select('role', p, [['xi', xiFullFor(p) ? 'Starting XI (full)' : 'Starting XI', xiFullFor(p)], ['sub', 'Substitute']], p.role);
+  }
+  function posSelect(p) { return select('pos', p, POS.map(x => [x.key, x.label]), p.pos); }
+
+  function cardUnassigned(p) {
+    return `<li class="pcard" data-pid="${p.id}" data-pool="1">
+      <div class="pc-top"><span class="pname">${esc(p.name)}</span></div>
+      <div class="pc-controls">
+        ${posSelect(p)}
+        ${roleSelect(p)}
+        <div class="team-btns">
+          <button type="button" class="btn btn-sm btn-home" data-act="assign" data-team="home" aria-label="Assign ${esc(p.name)} to Home">→ Home</button>
+          <button type="button" class="btn btn-sm btn-away" data-act="assign" data-team="away" aria-label="Assign ${esc(p.name)} to Away">→ Away</button>
+        </div>
+      </div>
+    </li>`;
+  }
+  function assignedControls(p) {
+    return `<div class="pc-controls">
+      ${select('team', p, [['', 'Unassigned'], ['home', 'Home'], ['away', 'Away']], p.team || '')}
+      ${roleSelect(p)}
+      ${posSelect(p)}
+    </div>`;
+  }
+  function cardSub(p, index, count) {
+    return `<li class="pcard bench-item" data-pid="${p.id}" data-team="${p.team}">
+      <div class="pc-top">
+        <span class="handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
+        <span class="order">${index + 1}.</span>
+        <span class="pname">${esc(p.name)}</span>
+        <button type="button" class="icon-btn" data-act="up" ${index === 0 ? 'disabled' : ''} aria-label="Move ${esc(p.name)} up the bench" title="Move up">↑</button>
+        <button type="button" class="icon-btn" data-act="down" ${index === count - 1 ? 'disabled' : ''} aria-label="Move ${esc(p.name)} down the bench" title="Move down">↓</button>
+      </div>
+      ${assignedControls(p)}
+    </li>`;
+  }
+
+  let selectedId = null;   // player whose editor is open under a pitch (not saved)
+  const initials = name => name.trim().split(/\s+/).slice(0, 2).map(w => Array.from(w)[0] || '').join('').toUpperCase();
+
+  function tokenHtml(p) {
+    const sel = p.id === selectedId;
+    return `<div class="token${p.pos === 'GK' ? ' gk' : ''}${sel ? ' selected' : ''}" role="button" tabindex="0" draggable="true"
+        data-token="${p.id}" aria-pressed="${sel}" title="${esc(p.name)}"
+        aria-label="${esc(p.name)}, ${posLabel(p.pos)}. Press to edit.">
+      <span class="shirt" aria-hidden="true">${esc(initials(p.name))}</span><span class="tname">${esc(p.name)}</span>
+    </div>`;
+  }
+
+  function pitchHtml(team) {
+    // Attack at the top, own goal at the bottom.
+    const bands = [...POS].reverse().map(pp => {
+      const list = xiOf(team, pp.key);
+      return `<div class="band" role="group" aria-label="${pp.plural}, ${list.length}" data-team="${team}" data-pos="${pp.key}">
+        <span class="band-label" aria-hidden="true">${pp.plural} · ${list.length}</span>${list.map(tokenHtml).join('')}
+      </div>`;
+    }).join('');
+    return `<div class="pitch" aria-label="${TEAM_NAME[team]} starting XI pitch">
+      <div class="pm pm-center"></div><div class="pm pm-box"></div><div class="pm pm-six"></div><div class="pm pm-arc"></div><div class="pm pm-goal"></div>
+      ${bands}
+      ${xiOf(team).length ? '' : '<p class="pitch-hint">Drag players here, or send them from the unassigned pool.</p>'}
+    </div>`;
+  }
+
+  function teamHtml(team) {
+    const xi = xiOf(team), bench = benchOf(team);
+    const gk = xiOf(team, 'GK').length;
+    const chips = [];
+    if (xi.length === MAX_XI) chips.push('<span class="chip ok">XI complete</span>');
+    else chips.push(`<span class="chip warn">XI needs ${MAX_XI - xi.length} more</span>`);
+    if (xi.length > 0 && gk === 0) chips.push('<span class="chip warn">No goalkeeper in XI</span>');
+    if (gk > 1) chips.push('<span class="chip warn">More than one goalkeeper in XI</span>');
+
+    const sp = selectedId && byId(selectedId);
+    const editor = sp && sp.team === team && sp.role === 'xi'
+      ? `<div class="pcard sel-panel" data-pid="${sp.id}">
+           <div class="pc-top"><span class="pname">${esc(sp.name)}</span>
+             <button type="button" class="icon-btn" data-act="deselect" aria-label="Close editor" title="Close">✕</button></div>
+           ${assignedControls(sp)}
+         </div>`
+      : '<p class="pitch-tip">Click a player to edit. Drag onto a line to change position, or onto the bench to substitute.</p>';
+
+    const posSummary = POS.map(pp => `<span class="chip" title="${pp.plural}">${pp.key} ${bench.filter(p => p.pos === pp.key).length}</span>`).join('');
+
+    return `<article class="team team-${team}" aria-label="${TEAM_NAME[team]} team">
+      <div class="team-head"><h2>${TEAM_NAME[team]}</h2></div>
+      <div class="chips">${chips.join('')}</div>
+
+      <section class="sub-section" aria-label="${TEAM_NAME[team]} starting XI">
+        <h3>Starting XI <span class="count">${xi.length} / ${MAX_XI}</span></h3>
+        ${pitchHtml(team)}
+        ${editor}
+      </section>
+
+      <section class="sub-section bench-zone" data-team="${team}" aria-label="${TEAM_NAME[team]} substitutes">
+        <h3>Substitutes <span class="count">${bench.length}</span></h3>
+        <div class="pos-summary" aria-label="Substitutes by position">${posSummary}</div>
+        ${bench.length
+          ? `<p class="reorder-hint">Bench order = who comes on first. Drag, or use the arrows.</p>
+             <ol class="cards bench" data-team="${team}">${bench.map((p, i) => cardSub(p, i, bench.length)).join('')}</ol>`
+          : '<p class="none">No substitutes. Drop a player here to bench them.</p>'}
+      </section>
+    </article>`;
+  }
+
+  function renderSort() {
+    const un = unassignedPlayers();
+    el.unassigned.innerHTML = `
+      <div class="panel-head">
+        <h2>Unassigned <span class="count">${un.length}</span></h2>
+        <p class="panel-sub">Choose a position and role, then send the player to a team.</p>
+      </div>
+      ${un.length
+        ? `<ul class="cards">${un.map(cardUnassigned).join('')}</ul>`
+        : '<p class="all-done">✓ Everyone is assigned to a team.</p>'}`;
+    el.teams.innerHTML = teamHtml('home') + teamHtml('away');
+  }
+
+  /* ---------- Step 2: actions ---------- */
+  let pendingFocus = null;
+  function restoreFocus() {
+    if (!pendingFocus) return;
+    const { pid, ctl, act, token } = pendingFocus;
+    pendingFocus = null;
+    if (token) { const t = el.step2.querySelector(`[data-token="${token}"]`); if (t) { t.focus(); return; } }
+    const card = el.step2.querySelector(`[data-pid="${pid}"]`);
+    const sel = ctl ? `[data-ctl="${ctl}"]` : `[data-act="${act}"]`;
+    let target = card && card.querySelector(sel);
+    if (target && target.disabled) target = null;
+    if (!target && card && (act === 'up' || act === 'down')) target = card.querySelector(`[data-act="${act === 'up' ? 'down' : 'up'}"]:not(:disabled)`);
+    if (!target && card) target = card.querySelector('select, button:not(:disabled)');
+    if (!target) target = el.unassigned.querySelector('select, button') || el.exportBtn;
+    target.focus({ preventScroll: false });
+  }
+
+  function describe(p) {
+    if (!p.team) return `${p.name} moved to unassigned`;
+    return `${p.name} is now ${posLabel(p.pos).toLowerCase()} · ${TEAM_NAME[p.team]} ${p.role === 'xi' ? 'Starting XI' : 'bench'}`;
+  }
+
+  // Single entry point for every move: ch may hold team, role and/or pos.
+  function applyPlacement(p, ch) {
+    const prevTeam = p.team, prevRole = p.role;
+    let notice = '';
+    if ('pos' in ch && POS_KEYS.includes(ch.pos)) p.pos = ch.pos;
+    if ('team' in ch) p.team = ch.team === 'home' || ch.team === 'away' ? ch.team : null;
+    if ('role' in ch) p.role = ch.role === 'sub' ? 'sub' : 'xi';
+
+    const moved = p.team !== prevTeam || p.role !== prevRole;
+    if (moved && p.team && p.role === 'xi') {
+      const inXI = state.players.filter(q => q.id !== p.id && q.team === p.team && q.role === 'xi').length;
+      if (inXI >= MAX_XI) {
+        p.role = 'sub';
+        notice = `${TEAM_NAME[p.team]}’s Starting XI is full, so ${p.name} went to the bench.`;
+      }
+    }
+    if (moved && p.team && p.role === 'sub') p.seq = ++state.seq;   // joins the back of the bench
+    if (selectedId === p.id && !(p.team && p.role === 'xi')) selectedId = null;
+    return notice;
+  }
+  function applyChange(p, ctl, val) {
+    if (ctl === 'pos') return applyPlacement(p, { pos: val });
+    if (ctl === 'role') return applyPlacement(p, { role: val });
+    return applyPlacement(p, { team: val });   // 'team' select or the → Home / → Away buttons
+  }
+
+  function moveBench(id, targetId, after) {
+    const p = byId(id);
+    if (!p || id === targetId) return;
+    const bench = benchOf(p.team);
+    const seqs = bench.map(x => x.seq).sort((a, b) => a - b);
+    const ids = bench.map(x => x.id).filter(x => x !== id);
+    let i = ids.indexOf(targetId);
+    if (i < 0) return;
+    if (after) i++;
+    ids.splice(i, 0, id);
+    ids.forEach((pid, k) => { byId(pid).seq = seqs[k]; });
+    return ids.indexOf(id) + 1;
+  }
+
+  el.step2.addEventListener('change', e => {
+    const s = e.target.closest('select[data-ctl]');
+    const card = e.target.closest('[data-pid]');
+    if (!s || !card) return;
+    const p = byId(card.dataset.pid);
+    if (!p) return;
+    pendingFocus = { pid: p.id, ctl: s.dataset.ctl };
+    const notice = applyChange(p, s.dataset.ctl, s.value);
+    renderAll();
+    restoreFocus();
+    announce(notice || describe(p));
+    if (notice) toast(notice);
+  });
+
+  function toggleSelect(id) {
+    selectedId = selectedId === id ? null : id;
+    pendingFocus = { token: id };
+    renderAll(); restoreFocus();
+  }
+  el.step2.addEventListener('keydown', e => {
+    const tk = e.target.closest && e.target.closest('[data-token]');
+    if (tk && e.target === tk && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggleSelect(tk.dataset.token); }
+  });
+  el.step2.addEventListener('click', e => {
+    const tk = e.target.closest('[data-token]');
+    if (tk) { toggleSelect(tk.dataset.token); return; }
+    const btn = e.target.closest('button[data-act]');
+    const card = e.target.closest('[data-pid]');
+    if (!btn || !card) return;
+    const p = byId(card.dataset.pid);
+    if (!p) return;
+    const act = btn.dataset.act;
+    pendingFocus = { pid: p.id, act };
+    if (act === 'deselect') {
+      selectedId = null; pendingFocus = { token: p.id };
+      renderAll(); restoreFocus();
+    } else if (act === 'assign') {
+      const notice = applyChange(p, 'assign', btn.dataset.team);
+      renderAll(); restoreFocus();
+      announce(notice || describe(p));
+      if (notice) toast(notice);
+    } else if (act === 'up' || act === 'down') {
+      const bench = benchOf(p.team);
+      const i = bench.findIndex(x => x.id === p.id);
+      const neighbour = bench[act === 'up' ? i - 1 : i + 1];
+      if (!neighbour) return;
+      const place = moveBench(p.id, neighbour.id, act === 'down');
+      renderAll(); restoreFocus();
+      announce(`${p.name} is now number ${place} on the ${TEAM_NAME[p.team]} bench`);
+    }
+  });
+
+  /* ---------- Drag & drop ---------- */
+  // Sources: pitch tokens, bench cards (reorder or move) and unassigned cards.
+  // Targets: a pitch line (team + position), the bench of a team, or another bench slot (reorder).
+  let drag = null;
+  const MARKS = '.drop-before, .drop-after, .over';
+  const clearMarks = () => {
+    el.step2.querySelectorAll(MARKS).forEach(n => n.classList.remove('drop-before', 'drop-after', 'over'));
+    el.step2.querySelectorAll('.dragging').forEach(n => n.classList.remove('dragging'));
+  };
+  const SRC = '[data-token], .bench-item, .pcard[data-pool]';
+
+  function benchSlot(e) {
+    if (!drag || drag.kind !== 'bench') return null;
+    let li = e.target.closest && e.target.closest('.bench-item');
+    if (!li) {
+      // Pointer is in the gap between cards: use the nearest card on the same bench.
+      const list = e.target.closest && e.target.closest('.bench');
+      if (!list || list.dataset.team !== drag.team) return null;
+      let best = null, bestD = Infinity;
+      list.querySelectorAll('.bench-item').forEach(n => {
+        const r = n.getBoundingClientRect();
+        const d = Math.abs(e.clientY - (r.top + r.height / 2));
+        if (d < bestD) { best = n; bestD = d; }
+      });
+      li = best;
+    }
+    if (!li || li.dataset.team !== drag.team || li.dataset.pid === drag.id) return null;
+    const r = li.getBoundingClientRect();
+    return { type: 'reorder', li, after: e.clientY >= r.top + r.height / 2 };
+  }
+  function resolveDrop(e) {
+    if (!drag || !e.target.closest) return null;
+    const band = e.target.closest('.band');
+    if (band) return { type: 'band', band };
+    const slot = benchSlot(e);
+    if (slot) return slot;
+    const zone = e.target.closest('.bench-zone');
+    if (zone && !(drag.kind === 'bench' && zone.dataset.team === drag.team)) return { type: 'bench', zone };
+    return null;
+  }
+
+  // Only the name row of a card starts a drag, so dropdowns and buttons keep working normally.
+  el.step2.addEventListener('pointerdown', e => {
+    const c = e.target.closest && e.target.closest('.bench-item, .pcard[data-pool]');
+    if (c) c.draggable = !!e.target.closest('.pc-top') && !e.target.closest('button');
+  });
+  el.step2.addEventListener('dragstart', e => {
+    const src = e.target.closest && e.target.closest(SRC);
+    if (!src) return;
+    const id = src.dataset.token || src.dataset.pid;
+    const p = byId(id);
+    if (!p) return;
+    drag = { id, team: p.team, kind: src.dataset.token ? 'pitch' : src.dataset.pool ? 'pool' : 'bench' };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+    requestAnimationFrame(() => src.classList.add('dragging'));
+  });
+  el.teams.addEventListener('dragover', e => {
+    const t = resolveDrop(e);
+    if (!t) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    el.teams.querySelectorAll(MARKS).forEach(n => n.classList.remove('drop-before', 'drop-after', 'over'));
+    if (t.type === 'reorder') t.li.classList.add(t.after ? 'drop-after' : 'drop-before');
+    else if (t.type === 'band') t.band.classList.add('over');
+    else t.zone.classList.add('over');
+  });
+  el.teams.addEventListener('drop', e => {
+    const t = resolveDrop(e);
+    if (!t) return;
+    e.preventDefault();
+    const p = byId(drag.id);
+    drag = null;
+    if (!p) return;
+    let msg = '', notice = '';
+    if (t.type === 'reorder') {
+      const n = moveBench(p.id, t.li.dataset.pid, t.after);
+      if (n) msg = `${p.name} is now number ${n} on the ${TEAM_NAME[p.team]} bench`;
+    } else if (t.type === 'band') {
+      notice = applyPlacement(p, { team: t.band.dataset.team, role: 'xi', pos: t.band.dataset.pos });
+      msg = notice || describe(p);
+    } else {
+      notice = applyPlacement(p, { team: t.zone.dataset.team, role: 'sub' });
+      msg = notice || describe(p);
+    }
+    renderAll();
+    if (msg) announce(msg);
+    if (notice) toast(notice);
+  });
+  el.step2.addEventListener('dragend', e => {
+    drag = null; clearMarks();
+    const c = e.target.closest && e.target.closest('.bench-item, .pcard[data-pool]');
+    if (c) c.draggable = false;
+  });
+
+  /* ---------- Step 3: export (print) ---------- */
+  function buildSheet() {
+    const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const block = team => {
+      const xi = xiOf(team), bench = benchOf(team);
+      return `<section class="ps-team ps-${team}">
+        <h2>${TEAM_NAME[team]}</h2>
+        <h3>Starting XI <span>${xi.length}</span></h3>
+        ${POS.map(pp => {
+          const list = xiOf(team, pp.key);
+          return `<div class="ps-group"><h4>${pp.plural} <span>(${list.length})</span></h4>` +
+            (list.length ? `<ul>${list.map(p => `<li>${esc(p.name)}</li>`).join('')}</ul>` : '<p class="ps-none">None</p>') + '</div>';
+        }).join('')}
+        <h3>Substitutes (bench order) <span>${bench.length}</span></h3>
+        ${bench.length
+          ? `<ol>${bench.map(p => `<li><span class="ps-name">${esc(p.name)}</span><span class="ps-pos">${posLabel(p.pos)}</span></li>`).join('')}</ol>`
+          : '<p class="ps-none">No substitutes</p>'}
+      </section>`;
+    };
+    const un = unassignedPlayers();
+    el.printSheet.innerHTML = `
+      <div class="ps-header"><h1>Match sheet</h1><p>Home vs Away · ${esc(date)}</p></div>
+      <div class="ps-teams">${block('home')}${block('away')}</div>
+      ${un.length ? `<section class="ps-unassigned"><h3>Not yet assigned (${un.length})</h3><p>${un.map(p => esc(p.name)).join(', ')}</p></section>` : ''}`;
+  }
+
+  let titleBackup = null;
+  let printFired = false;
+  window.addEventListener('beforeprint', () => { printFired = true; buildSheet(); titleBackup = document.title; document.title = 'Match sheet'; });
+  window.addEventListener('afterprint', () => { if (titleBackup !== null) document.title = titleBackup; titleBackup = null; });
+
+  /* ----- Fallback for views where printing is blocked (sandboxed previews, some embedded browsers) ----- */
+  const FONT = '"Segoe UI", system-ui, -apple-system, Roboto, Arial, "Noto Naskh Arabic", "Noto Sans Arabic", sans-serif';
+
+  // Draws one team column. With draw=false it only measures. Returns the height used.
+  function teamBlock(g, team, x, y, w, draw) {
+    const kit = team === 'home' ? '#1f6fb5' : '#cf5a1c';
+    const xi = xiOf(team), bench = benchOf(team);
+    const T = (txt, tx, ty, font, color, align = 'left') => {
+      if (!draw) return;
+      g.font = font; g.fillStyle = color; g.textAlign = align; g.fillText(txt, tx, ty);
+    };
+    const line = (x1, y1, x2, color, wd, dash) => {
+      if (!draw) return;
+      g.strokeStyle = color; g.lineWidth = wd; g.setLineDash(dash || []);
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y1); g.stroke(); g.setLineDash([]);
+    };
+    const fit = (txt, font, maxW) => {
+      g.font = font;
+      if (g.measureText(txt).width <= maxW) return txt;
+      const chars = Array.from(txt);
+      while (chars.length > 1 && g.measureText(chars.join('') + '…').width > maxW) chars.pop();
+      return chars.join('') + '…';
+    };
+    let cy = y;
+    if (draw) { g.fillStyle = kit; g.fillRect(x, cy, w, 8); }
+    cy += 8 + 54;
+    T(TEAM_NAME[team], x, cy, `800 44px ${FONT}`, kit);
+    cy += 14;
+    const heading = (label, count) => {
+      cy += 36;
+      T(label.toUpperCase(), x, cy, `700 24px ${FONT}`, '#111');
+      T(String(count), x + w, cy, `400 24px ${FONT}`, '#444', 'right');
+      cy += 10; line(x, cy, x + w, '#111', 2); cy += 6;
+    };
+    heading('Starting XI', xi.length);
+    for (const pp of POS) {
+      const list = xiOf(team, pp.key);
+      cy += 28;
+      T(`${pp.plural.toUpperCase()} (${list.length})`, x, cy, `700 19px ${FONT}`, '#444');
+      cy += 4;
+      if (!list.length) { cy += 32; T('None', x, cy, `400 24px ${FONT}`, '#777'); cy += 8; continue; }
+      for (const p of list) {
+        cy += 37;
+        T(fit(p.name, `400 27px ${FONT}`, w), x, cy, `400 27px ${FONT}`, '#000');
+        cy += 9; line(x, cy, x + w, '#9a9a9a', 1, [2, 4]);
+      }
+    }
+    heading('Substitutes (bench order)', bench.length);
+    if (!bench.length) { cy += 32; T('No substitutes', x, cy, `400 24px ${FONT}`, '#777'); cy += 8; }
+    bench.forEach((p, i) => {
+      cy += 37;
+      const posTxt = posLabel(p.pos);
+      g.font = `400 20px ${FONT}`;
+      const posW = g.measureText(posTxt).width;
+      T(`${i + 1}.`, x + 34, cy, `700 27px ${FONT}`, '#000', 'right');
+      T(posTxt, x + w, cy, `400 20px ${FONT}`, '#444', 'right');
+      T(fit(p.name, `400 27px ${FONT}`, w - 52 - posW - 12), x + 48, cy, `400 27px ${FONT}`, '#000');
+      cy += 9; line(x, cy, x + w, '#9a9a9a', 1, [2, 4]);
+    });
+    return cy - y;
+  }
+
+  // Renders the whole sheet on an A4-proportioned canvas (150 dpi). Canvas text handles Arabic and other scripts.
+  function drawSheet() {
+    const W = 1240, H = 1754, M = 72;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    g.textBaseline = 'alphabetic';
+    const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    g.fillStyle = '#111'; g.textAlign = 'left'; g.font = `800 54px ${FONT}`; g.fillText('Match sheet', M, M + 44);
+    g.fillStyle = '#444'; g.textAlign = 'right'; g.font = `400 26px ${FONT}`; g.fillText(`Home vs Away · ${date}`, W - M, M + 44);
+    g.fillStyle = '#111'; g.fillRect(M, M + 62, W - 2 * M, 4);
+
+    const top = M + 100, gap = 56, colW = (W - 2 * M - gap) / 2;
+    const un = unassignedPlayers();
+    const unLines = [];
+    if (un.length) {
+      g.font = `400 24px ${FONT}`;
+      let cur = '';
+      un.map(p => p.name).forEach((n, i, arr) => {
+        const piece = n + (i < arr.length - 1 ? ', ' : '');
+        if (cur && g.measureText(cur + piece).width > W - 2 * M) { unLines.push(cur); cur = ''; }
+        cur += piece;
+      });
+      if (cur) unLines.push(cur);
+    }
+    const footH = un.length ? 70 + unLines.length * 34 : 0;
+    const avail = H - M - top - footH;
+    const need = Math.max(teamBlock(g, 'home', 0, 0, colW, false), teamBlock(g, 'away', 0, 0, colW, false));
+    const k = Math.min(1, avail / need);
+    ['home', 'away'].forEach((t, i) => {
+      g.save(); g.translate(M + i * (colW + gap), top); g.scale(k, k);
+      teamBlock(g, t, 0, 0, colW / k, true);
+      g.restore();
+    });
+    if (un.length) {
+      const fy = H - M - footH + 30;
+      g.fillStyle = '#555'; g.textAlign = 'left'; g.font = `700 22px ${FONT}`;
+      g.fillText(`NOT YET ASSIGNED (${un.length})`, M, fy);
+      g.fillStyle = '#222'; g.font = `400 24px ${FONT}`;
+      unLines.forEach((l, i) => g.fillText(l, M, fy + 38 + i * 34));
+    }
+    return c;
+  }
+
+  function sheetText() {
+    const out = ['MATCH SHEET', ''];
+    for (const t of ['home', 'away']) {
+      out.push(TEAM_NAME[t].toUpperCase(), `Starting XI (${xiOf(t).length})`);
+      for (const pp of POS) {
+        const l = xiOf(t, pp.key);
+        out.push(`  ${pp.plural} (${l.length}): ${l.length ? l.map(p => p.name).join(', ') : '-'}`);
+      }
+      const bench = benchOf(t);
+      out.push(`Substitutes, in bench order (${bench.length})`);
+      bench.forEach((p, i) => out.push(`  ${i + 1}. ${p.name} (${posLabel(p.pos)})`));
+      if (!bench.length) out.push('  -');
+      out.push('');
+    }
+    const un = unassignedPlayers();
+    if (un.length) out.push(`Not yet assigned (${un.length}): ${un.map(p => p.name).join(', ')}`);
+    return out.join('\n').trim();
+  }
+
+  // Minimal one-page A4 PDF holding the sheet image (no library needed).
+  async function makePdf(canvas) {
+    const jpegBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.93));
+    const jpeg = new Uint8Array(await jpegBlob.arrayBuffer());
+    const enc = new TextEncoder();
+    const chunks = [], offsets = [];
+    let pos = 0;
+    const put = d => { const u = typeof d === 'string' ? enc.encode(d) : d; chunks.push(u); pos += u.length; };
+    const obj = (n, body) => { offsets[n] = pos; put(`${n} 0 obj\n${body}\nendobj\n`); };
+    put('%PDF-1.4\n');
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+    obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>');
+    const content = 'q 595.28 0 0 841.89 0 0 cm /Im0 Do Q';
+    obj(4, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+    offsets[5] = pos;
+    put(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`);
+    put(jpeg);
+    put('\nendstream\nendobj\n');
+    const xref = pos;
+    put('xref\n0 6\n0000000000 65535 f \n' + [1, 2, 3, 4, 5].map(n => String(offsets[n]).padStart(10, '0') + ' 00000 n \n').join(''));
+    put(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+    return new Blob(chunks, { type: 'application/pdf' });
+  }
+
+  const exportDialog = $('exportDialog');
+  let sheetCanvas = null;
+  function openExport(blocked) {
+    showPreview();
+    sheetCanvas = drawSheet();
+    $('exportImg').src = sheetCanvas.toDataURL('image/jpeg', 0.9);
+    const msg = $('exportMsg');
+    msg.className = 'export-msg' + (blocked ? ' blocked' : '');
+    msg.textContent = blocked
+      ? 'This view can’t open the print dialog. Use Download PDF or Copy as text instead.'
+      : 'Download the sheet as a PDF, or print it.';
+    exportDialog.showModal();
+  }
+  $('exportClose').addEventListener('click', () => exportDialog.close());
+  $('dlPdf').addEventListener('click', async () => {
+    let blob;
+    try { blob = await makePdf(sheetCanvas || drawSheet()); }
+    catch (e) { toast('Couldn’t create the PDF in this view.'); return; }
+
+    // Inside claude.ai the page can't start downloads itself: ask the viewer through the `downloads` capability.
+    let dl = null;
+    try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
+    if (dl) {
+      try {
+        await dl.save({ filename: 'match-sheet.pdf', data: blob });
+        toast('PDF saved');
+        return;
+      } catch (err) {
+        if (err && err.code === 'declined') { toast('Download cancelled'); return; }
+        /* any other failure: try the plain browser download below */
+      }
+    }
+    try {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'match-sheet.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast('PDF created. Check your downloads.');
+    } catch (e) { toast('Couldn’t save the PDF in this view. Try Copy as text.'); }
+  });
+  $('printAgain').addEventListener('click', () => { exportDialog.close(); runPrint(); });
+  function showPreview() { $('textPane').hidden = true; $('exportPreview').hidden = false; }
+  $('backToPreview').addEventListener('click', showPreview);
+  $('copyText').addEventListener('click', async () => {
+    // The text goes in a visible box inside the dialog: it works as a manual fallback
+    // wherever the clipboard is blocked (sandboxed previews), and a hidden field outside a modal dialog can't be focused.
+    const ta = $('sheetTextArea');
+    ta.value = sheetText();
+    $('textPane').hidden = false;
+    $('exportPreview').hidden = true;
+    ta.focus(); ta.select();
+    let ok = false;
+    try { await navigator.clipboard.writeText(ta.value); ok = true; } catch (e) { /* try the older route */ }
+    if (!ok) { try { ta.focus(); ta.select(); ok = document.execCommand('copy'); } catch (e) { /* ignore */ } }
+    ta.focus(); ta.select();
+    toast(ok ? 'Copied. The text is also shown here if you need it.' : 'Text selected. Press Ctrl+C (⌘C on Mac) to copy it.');
+  });
+
+  // Try the real print dialog first. If it never opens (beforeprint never fires), show the fallback.
+  function runPrint() {
+    printFired = false;
+    buildSheet();
+    window.print();
+    setTimeout(() => { if (!printFired) openExport(true); }, 400);
+  }
+  el.exportBtn.addEventListener('click', () => {
+    const un = unassignedPlayers().length;
+    if (un) toast(`${un} player${un === 1 ? ' is' : 's are'} still unassigned. They’ll be listed at the bottom of the sheet.`);
+    runPrint();
+  });
+
+  /* ---------- Step 4: save / reset ---------- */
+  el.saveBtn.addEventListener('click', savePlan);
+
+  el.resetBtn.addEventListener('click', () => {
+    $('resetText').textContent = state.players.length || savedKey !== null
+      ? `This clears ${state.players.length} player${state.players.length === 1 ? '' : 's'}, all team sorting and the plan saved in this browser. This can’t be undone.`
+      : 'This clears everything on the page and any plan saved in this browser. This can’t be undone.';
+    el.resetDialog.showModal();
+  });
+  el.resetDialog.addEventListener('click', e => {
+    const b = e.target.closest('[data-result]');
+    if (b) el.resetDialog.close(b.dataset.result);
+  });
+  el.resetDialog.addEventListener('close', () => {
+    if (el.resetDialog.returnValue !== 'confirm') return;
+    clearSaved();
+    state = { players: [], seq: 0, step: 1 };
+    setFormError('');
+    el.nameInput.value = '';
+    setStep(1, false);
+    el.nameInput.focus();
+    toast('Everything has been reset');
+  });
+  // Clear the returnValue so a dismissed dialog (Esc) is never mistaken for a confirm.
+  el.resetDialog.addEventListener('cancel', () => { el.resetDialog.returnValue = 'cancel'; });
+
+  /* ---------- Init ---------- */
+  const restored = loadPlan();
+  setStep(state.step, false);
+  if (restored && state.players.length) toast(`Restored your saved plan (${state.players.length} players)`);
+})();
+</script>
+
+</body></html>
